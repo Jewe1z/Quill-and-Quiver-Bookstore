@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display&family=Cormorant+Garamond:ital@1&family=Great+Vibes&display=swap" rel="stylesheet">
+    <style>
+        nav {
+            display: flex;
+            gap: 20px;
+            padding: 10px;
+            background: #5c0d76;
+        }
+        nav a {
+            text-decoration: none;
+            cursor: pointer;
+            color: #9b7cc0;
+            font-size: 1.4rem;
+        }
+        #nav-right {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 3rem;
+            background-color: #9b7cc0;
+            border: 1px solid #7a5a9e;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        } 
+        h2, h3 {
+            font-family: 'Cormorant Garamond', serif;
+            background-color: #9b7cc0;
+            border: 1px solid #7a5a9e;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+        body, p {
+            font-family: 'Cormorant Garamond', serif;
+            line-height: 1.5;
+            background-color: #9b7cc0;
+            border: 1px solid #7a5a9e;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('BookshopBackground.jpg');
+            background-size: cover;
+            background-position: center;
+            filter: blur(5px);
+            z-index: -1;
+            background-color: rgba(0, 0, 0, 0.5);
+            background-blend-mode: darken;
+        }
+        #order-summary {
+            background-color: #9b7cc0;
+            border: 1px solid #7a5a9e;
+            border-radius: 8px;
+            padding: 20px;
+            max-width: 500px;
+            margin: 20px auto;
+            font-family: 'Cormorant Garamond', serif;
+        }
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px dashed #7a5a9e;
+            padding: 10px 0;
+        }
+        .summary-total {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.5rem;
+            margin-top: 15px;
+            color: #5c0d76;
+            border-top: 2px solid #7a5a9e;
+            padding-top: 15px;
+            width: 100%;
+        }
+        .shipping-section {
+            max-width: 500px;
+            margin: 40px auto;
+            background-color: #9b7cc0;
+            border: 1px solid #7a5a9e;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: left;
+        }
+        .shipping-section input {
+            width: 100%;
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #7a5a9e;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .form-section {
+            background-color: #9b7cc0;
+            border: 1px solid #7a5a9e;
+            border-radius: 8px;
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            margin: 40px auto;
+        }
+        input {
+            width: 60%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #7a5a9e;
+            border-radius: 4px;
+        }
+        form button {
+            background-color: #7a5a9e;
+            color: #9b7cc0;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: bold;
+            display: block;
+            margin: 20px auto;
+            transition: all 0.3s ease;
+        }
+        form button:hover {
+            background-color: #5c0d76;
+            transform: translateY(-2px);
+            color: #7a5a9e;
+        }
+        #login {
+            display: flex;
+            gap: 20px;
+            cursor: pointer;
+        }
+        #logoutButton {
+            background-color: transparent;
+            color: #9b7cc0;
+            border: 1px solid #9b7cc0;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            border-radius: 4px;
+            font-family: 'Cormorant Garamond', serif;
+        }
+        #welcome-message {
+            color: #9b7cc0;
+            font-size: 1.4rem;
+            font-family: 'Cormorant Garamond', serif;
+        }
+        
+
+    </style>
+    <title>Payment Page</title>
+</head>
+<body>
+    <h1>The Quill and Quiver</h1>
+    <nav id="nav">
+        <a href="index.html">Home</a>
+        <a href="browse.html">Browse Books</a>
+        <a href="cart.html">My Cart</a>
+
+        <div id="nav-right">
+            <span id="login">
+                <a href="login.html">Login</a>
+                <a href="register.html">Register</a>
+            </span>
+            <span id="welcome-message"></span>
+            <button id="logoutButton">Logout</button>
+        </div>
+    </nav>
+    <h2>Checkout</h2>
+    
+    <!-- Summary of Order-->
+    <div id="order-summary">
+        <h2>Order Summary</h2>
+        <div id="summary-items"></div>
+        <hr>
+        <h3 id="summary-total">Total: $0.00</h3>
+    </div>
+
+    <form id="payment-form">
+        <div class="shipping-section">
+            <h2>Shipping Information</h2>
+            <input type="text" id="name" placeholder="Full Name" required>
+            <input type="text" id="address" placeholder="Shipping Address" required>
+            <input type="text" id="city" placeholder="City" required>
+            <input type="text" id="state" placeholder="State" required>
+            <input type="text" id="zip" placeholder="ZIP Code" required>
+        </div>
+        <div class="form-section">
+            <h2>Payment Information</h2>
+            <div id="payment-element"></div>
+            <div id="error-message"></div>
+            <button type="submit">Place Order</button>
+        </div>
+    </form>
+    <script src="https://js.stripe.com/v3/"></script>
+    <script>
+
+        let stripe;
+        let elements;
+
+        async function initialize(amountInCents) {
+            const res = await fetch('/api/create-payment-intent', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ amount: amountInCents })
+            });
+            const { clientSecret } = await res.json();
+
+            elements = stripe.elements({ clientSecret });  // No const/let, uses the outer variable
+            const paymentElement = elements.create('payment');
+            paymentElement.mount('#payment-element');
+        }
+        
+        async function loadConfig() {
+            const res = await fetch('/api/config');
+            const config = await res.json();
+            stripe = Stripe(config.stripePublishKey);
+            
+            const orderData = loadSummary();
+            if (orderData) {
+                const amountInCents = Math.round(orderData.total * 100);
+                await initialize(amountInCents);
+            }
+        }
+
+        loadConfig();
+        
+        function loadSummary() {
+            const data = JSON.parse(localStorage.getItem('pendingOrder'));
+            if (!data) {
+                alert("No items in cart!");
+                window.location.href = 'cart.html';
+                return null;
+            }
+
+            const itemsDiv = document.getElementById('summary-items');
+            itemsDiv.innerHTML = '';
+            data.items.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'summary-item';
+                div.innerHTML = `<span>${item.title} (x${item.quantity})</span> 
+                                 <span>$${(item.price * item.quantity).toFixed(2)}</span>`;
+                itemsDiv.appendChild(div);
+            });
+
+            document.getElementById('summary-total').textContent = `Total: $${data.total}`;
+            return data;
+        }
+
+        document.getElementById('payment-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!elements) {
+                document.getElementById('error-message').textContent = 'Payment form is loading.';
+                return;
+            }
+
+            const submitButton = e.target.querySelector('button');
+            submitButton.disabled = true;
+
+            const shipping = {
+                name: document.getElementById('name').value,
+                address: document.getElementById('address').value,
+                city: document.getElementById('city').value,
+                state: document.getElementById('state').value,
+                zip: document.getElementById('zip').value
+            };
+ 
+            const { paymentIntent, error } = await stripe.confirmPayment({
+                elements,
+                confirmParams: {
+                    return_url: window.location.origin + '/receipt.html',
+                    payment_method_data: {
+                        billing_details: { name: shipping.name }
+                    }
+                },
+                redirect: 'if_required'
+            });
+ 
+            if (error) {
+                document.getElementById('error-message').textContent = error.message;
+                submitButton.disabled = false;
+                return;
+            }
+
+            // 2. If payment succeeded, update the database stock
+            if (paymentIntent && paymentIntent.status === 'succeeded') {
+                const data = JSON.parse(localStorage.getItem('pendingOrder'));
+                
+                    const res = await fetch('/api/order', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            items: data.items, // This contains the book_id and quantity
+                            total: data.total,
+                            shipping,
+                            paymentIntentId: paymentIntent.id
+                        })
+                    });
+
+                    if (!res.ok) {
+                        const errData = await res.json();
+                        document.getElementById('error-message').textContent = errData.error || 'Order failed. Please contact support.';
+                        submitButton.disabled = false;
+                        return;
+                    }
+                    const result = await res.json();
+
+                    // 3. Store data for the receipt and clear the cart
+                    localStorage.setItem('receiptData', JSON.stringify({
+                        items: data.items,
+                        total: data.total,
+                        shipping,
+                        email: result.email
+                    }));
+                    
+                    localStorage.removeItem('pendingOrder');
+                    window.location.href = 'receipt.html';
+                }  
+        });
+
+
+        // Logout functionality
+        document.getElementById('logoutButton').addEventListener('click', async function()
+        {
+            await fetch("/api/logout");
+            window.location.href = 'index.html'; // Redirect to home page after logout
+        });
+
+        // Is User Logged In?
+        async function checkLoginStatus() {
+            try {
+                const response = await fetch('/api/user');
+                const result = await response.json();
+                if (result.loggedIn) {
+                    document.getElementById('login').style.display = 'none';
+                    document.getElementById('logoutButton').style.display = 'block';
+                    document.getElementById('logoutButton').textContent = `Logout (${result.username})`;
+
+                    const welcome = document.createElement('span');
+            welcome.id = 'welcome-message';
+            welcome.textContent = `Welcome, ${result.username}!`;
+            document.getElementById('nav-right').insertBefore(welcome, document.getElementById('logoutButton'));
+
+                    document.getElementById('logoutButton').addEventListener('click', async function() {
+                        await fetch("/api/logout");
+                        window.location.href = 'index.html';
+                    });
+                } else {
+                    document.getElementById('logoutButton').style.display = 'none';
+                    document.getElementById('login').style.display = 'flex';
+                }
+            } catch (error) {
+                console.error('Error checking login status:', error);
+            }
+        }
+        checkLoginStatus();
+    </script>
+</body>
+</html>

@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display&family=Cormorant+Garamond:ital@1&family=Great+Vibes&display=swap" rel="stylesheet">
+    <style>
+        nav {
+            display: flex;
+            gap: 20px;
+            padding: 10px;
+            background: #5c0d76;
+        }
+        nav a {
+            text-decoration: none;
+            cursor: pointer;
+            color: #9b7cc0;
+            font-size: 1.4rem;
+        }
+        #nav-right {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 3rem;
+            background-color: #9b7cc0;
+            border: 1px solid #7a5a9e;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+        h2, h3 {
+            font-family: 'Cormorant Garamond', serif;
+            background-color: #9b7cc0;
+            border: 1px solid #7a5a9e;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+        body, p {
+            font-family: 'Cormorant Garamond', serif;
+            line-height: 1.5;
+            background-color: #9b7cc0;
+            border: 1px solid #7a5a9e;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('BookshopBackground.jpg');
+            background-size: cover;
+            background-position: center;
+            filter: blur(5px);
+            z-index: -1;
+            background-color: rgba(0, 0, 0, 0.5);
+            background-blend-mode: darken;
+        }
+        #login {
+            display: flex;
+            gap: 20px;
+            cursor: pointer;
+        }
+        #logoutButton {
+            background-color: transparent;
+            color: #9b7cc0;
+            border: 1px solid #9b7cc0;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            border-radius: 4px;
+            font-family: 'Cormorant Garamond', serif;
+        }
+        #welcome-message {
+            color: #9b7cc0;
+            font-size: 1.4rem;
+            font-family: 'Cormorant Garamond', serif;
+        }
+        #search {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid #9b7cc0;
+            background-color: #5c0d76;
+            color: #7a5a9e;
+            font-family:'Cormorant Garamond', serif;
+            width: 200px;
+            outline: none;
+        }
+        #search::placeholder {
+            color: #c787e2;
+        }
+        #genre-list a {
+            display: inline-block;
+            margin: 5px;
+            padding: 5px 10px;
+            background-color: #9b7cc0;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        #genre-list a:hover {
+            background-color: #7a5a9e;
+        }
+        #genre-dropdown {
+            margin: 20px;
+            position: relative;
+            display: inline-block;
+        }
+
+        #genre-toggle {
+            padding: 10px;
+            background-color: #9b7cc0;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #book-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .book-card {
+            background-color: #9b7cc0;
+            border: 1px solid #7a5a9e;
+            border-radius: 8px;
+            padding: 15px;
+            width: 150px;
+            text-align: center;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: b-between;
+        }
+
+        .book-card:hover {
+            background-color: #7a5a9e;
+        }
+
+        .book-card h2 {
+            font-family:'Cormorant Garamond', serif;
+            font-size: 2rem;
+            margin: 10px 0 0 0;
+            flex-grow: 1;
+        }
+
+        .book-card img {
+            width: 100%;
+            height: auto;
+        }
+        .hidden {
+            display: none;
+        }
+        .book-card button {
+            margin-top: auto; /* Pushes the button to the bottom */
+            padding: 6px 14px;
+            background-color: #5c0d76;
+            color: #c787e2;
+            border: 1px solid #7a5a9e;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-family: 'Cormorant Garamond', serif;
+            width: 100%;
+        }
+        
+    </style>
+    <title>Browse Books</title>
+</head>
+<body>
+    <h1>The Quill and Quiver</h1>
+    <nav id="nav">
+        <a href="index.html">Home</a>
+        <a href="cart.html">My Cart</a>
+
+        <div id="nav-right">
+            <input type="text" id="search" placeholder="Search books...">
+            <span id="login">
+                <a href="login.html">Login</a>
+                <a href="register.html">Register</a>
+            </span>
+            <span id="welcome-message"></span>
+            <button id="logoutButton">Logout</button>
+        </div>
+    </nav>
+    <div id="genre-dropdown">
+    <button id="genre-toggle">Select a Genre ▼</button>
+    <div id="genre-list" class="hidden">
+        <a href="#" id="all-books">All Books</a>
+        <a href="#" data-id="11">Biography</a>  
+        <a href="#" data-id="19">Dark Romance</a> 
+        <a href="#" data-id="6">Dystopian</a> 
+        <a href="#" data-id="1">Fantasy</a>
+        <a href="#" data-id="5">Fiction</a>
+        <a href="#" data-id="15">Graphic Novel</a>
+        <a href="#" data-id="10">Historical</a>
+        <a href="#" data-id="9">Horror</a>
+        <a href="#" data-id="16">Manga</a>
+        <a href="#" data-id="13">Musical</a>
+        <a href="#" data-id="7">Mystery</a>
+        <a href="#" data-id="18">Non-Fiction</a>
+        <a href="#" data-id="2">Romance</a>
+        <a href="#" data-id="4">Science Fiction</a>
+        <a href="#" data-id="12">Self-Help</a>
+        <a href="#" data-id="8">Thriller</a>
+        <a href="#" data-id="17">True Crime</a>
+        <a href="#" data-id="3">Young Adult</a>
+        <a href="#" data-id="14">Western</a>  
+    </div>
+</div>
+    <div id="book-return"></div>
+    <div id="book-list"></div>
+
+    <script>
+        // Genre/Book click functionality
+        const toggleBtn = document.getElementById('genre-toggle');
+        const menu = document.getElementById('genre-list');
+
+        toggleBtn.addEventListener('click', () => {
+        menu.classList.toggle('hidden');
+        });
+        document.addEventListener('click', (e) => {
+            if (!document.getElementById('genre-dropdown').contains(e.target)) {
+                menu.classList.add('hidden');
+            }
+        });
+        document.getElementById('genre-list').addEventListener('click', async (event) => {
+            if (event.target.tagName === 'A') {
+                event.preventDefault();
+
+                const bookListDiv = document.getElementById('book-list');
+                bookListDiv.innerHTML = '';
+
+                // All Books clicked
+                if (event.target.id === 'all-books') {
+                    const response = await fetch('/api/books');
+                    const books = await response.json();
+                    displayBooks(books);
+                    return;
+                }
+
+                // Genre clicked
+                const genreId = event.target.dataset.id;
+                const response = await fetch(`/api/genres/${genreId}/books`);
+                const books = await response.json();
+                displayBooks(books);
+            }
+});
+// Function to display books in the book list or genre list
+        function displayBooks(books) {
+            const bookListDiv = document.getElementById('book-list');
+            bookListDiv.innerHTML = '';
+
+            books.sort((a, b) => a.title.localeCompare(b.title));
+
+            if (books.length === 0) {
+                bookListDiv.innerHTML = '<p>No books found.</p>';
+                return;
+            }
+
+            books.forEach(book => {
+                const bookDiv = document.createElement('div');
+                bookDiv.className = 'book-card';
+                bookDiv.addEventListener('click', () => {
+                    window.location.href = `book.html?id=${book.book_id}`;
+                });
+
+                const title = document.createElement('h2');
+                title.textContent = book.title;
+
+                const frontImg = document.createElement('img');
+                frontImg.src = `/frontCovers/${book.front_cover}`;
+
+                const addCartBtn = document.createElement('button');
+                addCartBtn.textContent = 'Add to Cart';
+                addCartBtn.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    addToCart(book.book_id, book.title);
+                });
+
+                bookDiv.appendChild(frontImg);
+                bookDiv.appendChild(title);
+                bookDiv.appendChild(addCartBtn);
+                bookListDiv.appendChild(bookDiv);
+    });
+}
+        // Search functionality
+        const search = document.getElementById('search');
+        search.addEventListener('input', async () => {
+            const query = search.value.trim();
+            if (query === '') {
+                document.getElementById('book-list').innerHTML = '';
+                return;
+            }
+
+            const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+            const books = await response.json();
+            displayBooks(books);
+        });
+
+        async function addToCart(bookId, bookTitle) {
+            const quantity = parseInt(prompt('How many copies would you like to add?'));
+            if (isNaN(quantity) || quantity <= 0) {
+                alert('Please enter a valid quantity.');
+                return;
+            }
+            try {
+                const response = await fetch('/api/cart', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ book_id: bookId, quantity })
+                });
+                if (response.ok) {
+                    alert(`Added ${quantity} copies of "${bookTitle}" to cart!`);
+                } else if (response.status === 401) {
+                    alert('Please log in to add books to your cart.');
+                    window.location.href = 'login.html';
+                } else {
+                    alert(await response.text());
+                }
+            } catch (error) {
+                console.error('Error adding book to cart:', error);
+                alert('An error occurred while adding the book to cart.');
+            }
+        }
+
+        // Logout functionality
+        document.getElementById('logoutButton').addEventListener('click', async function()
+        {
+            await fetch("/api/logout");
+            window.location.href = 'index.html'; // Redirect to home page after logout
+        });
+
+        // Is User Logged In?
+        async function checkLoginStatus() {
+    try {
+        const response = await fetch('/api/user');
+        const result = await response.json();
+        if (result.loggedIn) {
+            document.getElementById('login').style.display = 'none';
+            document.getElementById('logoutButton').style.display = 'block';
+            document.getElementById('logoutButton').textContent = `Logout (${result.username})`;
+
+            const welcome = document.createElement('span');
+            welcome.id = 'welcome-message';
+            welcome.textContent = `Welcome, ${result.username}!`;
+            document.getElementById('nav-right').insertBefore(welcome, document.getElementById('logoutButton'));
+
+            document.getElementById('logoutButton').addEventListener('click', async function() {
+                await fetch("/api/logout");
+                window.location.href = 'index.html';
+            });
+        } else {
+            document.getElementById('logoutButton').style.display = 'none';
+            document.getElementById('login').style.display = 'flex';
+        }
+    } catch (error) {
+        console.error('Error checking login status:', error);
+    }
+}
+        checkLoginStatus();
+
+    </script>
+    </body>
+</html>
