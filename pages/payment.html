@@ -158,8 +158,6 @@
             font-size: 1.4rem;
             font-family: 'Cormorant Garamond', serif;
         }
-        
-
     </style>
     <title>Payment Page</title>
 </head>
@@ -189,6 +187,7 @@
         <h3 id="summary-total">Total: $0.00</h3>
     </div>
 
+    <!-- Payment Form -->
     <form id="payment-form">
         <div class="shipping-section">
             <h2>Shipping Information</h2>
@@ -205,9 +204,9 @@
             <button type="submit">Place Order</button>
         </div>
     </form>
+
     <script src="https://js.stripe.com/v3/"></script>
     <script>
-
         let stripe;
         let elements;
 
@@ -238,6 +237,7 @@
 
         loadConfig();
         
+        // Load order summary from local pending order
         function loadSummary() {
             const data = JSON.parse(localStorage.getItem('pendingOrder'));
             if (!data) {
@@ -260,6 +260,7 @@
             return data;
         }
 
+        // Payment form
         document.getElementById('payment-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -268,6 +269,7 @@
                 return;
             }
 
+            // Submit button disabled until form is filled out
             const submitButton = e.target.querySelector('button');
             submitButton.disabled = true;
 
@@ -279,6 +281,7 @@
                 zip: document.getElementById('zip').value
             };
  
+            // Stripe
             const { paymentIntent, error } = await stripe.confirmPayment({
                 elements,
                 confirmParams: {
@@ -296,7 +299,7 @@
                 return;
             }
 
-            // 2. If payment succeeded, update the database stock
+            // If payment succeeded, update the database stock
             if (paymentIntent && paymentIntent.status === 'succeeded') {
                 const data = JSON.parse(localStorage.getItem('pendingOrder'));
                 
@@ -304,7 +307,7 @@
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            items: data.items, // This contains the book_id and quantity
+                            items: data.items,
                             total: data.total,
                             shipping,
                             paymentIntentId: paymentIntent.id
@@ -319,7 +322,7 @@
                     }
                     const result = await res.json();
 
-                    // 3. Store data for the receipt and clear the cart
+                    // Store data for the receipt
                     localStorage.setItem('receiptData', JSON.stringify({
                         items: data.items,
                         total: data.total,
@@ -327,15 +330,14 @@
                         email: result.email
                     }));
                     
+                    // Remove pending order
                     localStorage.removeItem('pendingOrder');
                     window.location.href = 'receipt.html';
                 }  
         });
 
-
-        // Logout functionality
-        document.getElementById('logoutButton').addEventListener('click', async function()
-        {
+        // Logout
+        document.getElementById('logoutButton').addEventListener('click', async function(){
             await fetch("/api/logout");
             window.location.href = 'index.html'; // Redirect to home page after logout
         });
@@ -351,9 +353,9 @@
                     document.getElementById('logoutButton').textContent = `Logout (${result.username})`;
 
                     const welcome = document.createElement('span');
-            welcome.id = 'welcome-message';
-            welcome.textContent = `Welcome, ${result.username}!`;
-            document.getElementById('nav-right').insertBefore(welcome, document.getElementById('logoutButton'));
+                    welcome.id = 'welcome-message';
+                    welcome.textContent = `Welcome, ${result.username}!`;
+                    document.getElementById('nav-right').insertBefore(welcome, document.getElementById('logoutButton'));
 
                     document.getElementById('logoutButton').addEventListener('click', async function() {
                         await fetch("/api/logout");

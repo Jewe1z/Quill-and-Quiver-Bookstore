@@ -153,6 +153,7 @@
     </div>
  
     <script>
+        // Load receipt data
         function loadReceipt() {
             const data = JSON.parse(localStorage.getItem('receiptData'));
             if (!data) {
@@ -169,10 +170,10 @@
                                  <span>$${(item.price * item.quantity).toFixed(2)}</span>`;
                 itemsDiv.appendChild(div);
             });
- 
+            // Total
             document.getElementById('receipt-total').textContent = `Total: $${data.total}`;
  
-            // Shipping
+            // Shipping details
             const s = data.shipping;
             document.getElementById('shipping-info').innerHTML = `
                 <strong>Shipping to:</strong><br>
@@ -181,49 +182,49 @@
                 ${s.city}, ${s.state} ${s.zip}
             `;
  
+            // Email receipt sent
             document.getElementById('confirmation-msg').textContent =
                 `A receipt has been sent to ${data.email}.`;
  
-            // Clear receipt data now that it's displayed
+            // Clear receipt data
             localStorage.removeItem('receiptData');
         }
  
         loadReceipt();
  
-        // Logout functionality
-        document.getElementById('logoutButton').addEventListener('click', async function()
-        {
+        // Logout
+        document.getElementById('logoutButton').addEventListener('click', async function(){
             await fetch("/api/logout");
             window.location.href = 'index.html'; // Redirect to home page after logout
         });
 
         // Is User Logged In?
         async function checkLoginStatus() {
-    try {
-        const response = await fetch('/api/user');
-        const result = await response.json();
-        if (result.loggedIn) {
-            document.getElementById('login').style.display = 'none';
-            document.getElementById('logoutButton').style.display = 'block';
-            document.getElementById('logoutButton').textContent = `Logout (${result.username})`;
+            try {
+                const response = await fetch('/api/user');
+                const result = await response.json();
+                if (result.loggedIn) {
+                    document.getElementById('login').style.display = 'none';
+                    document.getElementById('logoutButton').style.display = 'block';
+                    document.getElementById('logoutButton').textContent = `Logout (${result.username})`;
 
-            const welcome = document.createElement('span');
-            welcome.id = 'welcome-message';
-            welcome.textContent = `Welcome, ${result.username}!`;
-            document.getElementById('nav-right').insertBefore(welcome, document.getElementById('logoutButton'));
+                    const welcome = document.createElement('span');
+                    welcome.id = 'welcome-message';
+                    welcome.textContent = `Welcome, ${result.username}!`;
+                    document.getElementById('nav-right').insertBefore(welcome, document.getElementById('logoutButton'));
 
-            document.getElementById('logoutButton').addEventListener('click', async function() {
-                await fetch("/api/logout");
-                window.location.href = 'index.html';
-            });
-        } else {
-            document.getElementById('logoutButton').style.display = 'none';
-            document.getElementById('login').style.display = 'flex';
+                    document.getElementById('logoutButton').addEventListener('click', async function() {
+                        await fetch("/api/logout");
+                        window.location.href = 'index.html';
+                    });
+                } else {
+                    document.getElementById('logoutButton').style.display = 'none';
+                    document.getElementById('login').style.display = 'flex';
+                }
+            } catch (error) {
+                console.error('Error checking login status:', error);
+            }
         }
-    } catch (error) {
-        console.error('Error checking login status:', error);
-    }
-}
         checkLoginStatus();
     </script>
 </body>

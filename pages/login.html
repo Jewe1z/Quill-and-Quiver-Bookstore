@@ -74,7 +74,7 @@
             flex-direction: column;
             text-align: left;
         }
-       .register-link {
+        .register-link {
             display: block;
             margin-top: 15px;
             padding: 10px;
@@ -118,7 +118,6 @@
         button:hover {
             background-color: #5c0d76;
         }
-        
     </style>
     <title>Login Page</title>
 </head>
@@ -143,15 +142,15 @@
         <a href="register.html" class="register-link">No Account? Create One Here</a>
     </div>
     <script>
-        // Handle login form submission
-        document.getElementById('loginForm').addEventListener('submit', async function(event) {
-            event.preventDefault(); 
+        // Login form
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault(); 
 
             // Collect form data
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
 
-            // Create object for server
+            // Create data object
             const data = {
                 username: username,
                 password: password

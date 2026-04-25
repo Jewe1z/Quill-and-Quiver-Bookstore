@@ -113,7 +113,6 @@
             position: relative;
             display: inline-block;
         }
-
         #genre-toggle {
             padding: 10px;
             background-color: #9b7cc0;
@@ -127,7 +126,6 @@
             gap: 20px;
             padding: 20px;
         }
-
         .book-card {
             background-color: #9b7cc0;
             border: 1px solid #7a5a9e;
@@ -140,18 +138,15 @@
             flex-direction: column;
             justify-content: b-between;
         }
-
         .book-card:hover {
             background-color: #7a5a9e;
         }
-
         .book-card h2 {
             font-family:'Cormorant Garamond', serif;
             font-size: 2rem;
             margin: 10px 0 0 0;
             flex-grow: 1;
         }
-
         .book-card img {
             width: 100%;
             height: auto;
@@ -160,7 +155,7 @@
             display: none;
         }
         .book-card button {
-            margin-top: auto; /* Pushes the button to the bottom */
+            margin-top: auto;
             padding: 6px 14px;
             background-color: #5c0d76;
             color: #c787e2;
@@ -170,8 +165,7 @@
             font-size: 1rem;
             font-family: 'Cormorant Garamond', serif;
             width: 100%;
-        }
-        
+        }     
     </style>
     <title>Browse Books</title>
 </head>
@@ -220,12 +214,12 @@
     <div id="book-list"></div>
 
     <script>
-        // Genre/Book click functionality
+        // Genre dropdown
         const toggleBtn = document.getElementById('genre-toggle');
         const menu = document.getElementById('genre-list');
 
         toggleBtn.addEventListener('click', () => {
-        menu.classList.toggle('hidden');
+            menu.classList.toggle('hidden');
         });
         document.addEventListener('click', (e) => {
             if (!document.getElementById('genre-dropdown').contains(e.target)) {
@@ -253,12 +247,13 @@
                 const books = await response.json();
                 displayBooks(books);
             }
-});
+        });
 // Function to display books in the book list or genre list
         function displayBooks(books) {
             const bookListDiv = document.getElementById('book-list');
             bookListDiv.innerHTML = '';
 
+            // Sort alphabetically
             books.sort((a, b) => a.title.localeCompare(b.title));
 
             if (books.length === 0) {
@@ -290,9 +285,9 @@
                 bookDiv.appendChild(title);
                 bookDiv.appendChild(addCartBtn);
                 bookListDiv.appendChild(bookDiv);
-    });
-}
-        // Search functionality
+            });
+        }
+        // Search bar
         const search = document.getElementById('search');
         search.addEventListener('input', async () => {
             const query = search.value.trim();
@@ -300,12 +295,12 @@
                 document.getElementById('book-list').innerHTML = '';
                 return;
             }
-
             const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
             const books = await response.json();
             displayBooks(books);
         });
 
+        // Add book to cart
         async function addToCart(bookId, bookTitle) {
             const quantity = parseInt(prompt('How many copies would you like to add?'));
             if (isNaN(quantity) || quantity <= 0) {
@@ -332,7 +327,7 @@
             }
         }
 
-        // Logout functionality
+        // Logout
         document.getElementById('logoutButton').addEventListener('click', async function()
         {
             await fetch("/api/logout");
@@ -341,31 +336,31 @@
 
         // Is User Logged In?
         async function checkLoginStatus() {
-    try {
-        const response = await fetch('/api/user');
-        const result = await response.json();
-        if (result.loggedIn) {
-            document.getElementById('login').style.display = 'none';
-            document.getElementById('logoutButton').style.display = 'block';
-            document.getElementById('logoutButton').textContent = `Logout (${result.username})`;
+            try {
+                const response = await fetch('/api/user');
+                const result = await response.json();
+                if (result.loggedIn) {
+                    document.getElementById('login').style.display = 'none';
+                    document.getElementById('logoutButton').style.display = 'block';
+                    document.getElementById('logoutButton').textContent = `Logout (${result.username})`;
 
-            const welcome = document.createElement('span');
-            welcome.id = 'welcome-message';
-            welcome.textContent = `Welcome, ${result.username}!`;
-            document.getElementById('nav-right').insertBefore(welcome, document.getElementById('logoutButton'));
+                    const welcome = document.createElement('span');
+                    welcome.id = 'welcome-message';
+                    welcome.textContent = `Welcome, ${result.username}!`;
+                    document.getElementById('nav-right').insertBefore(welcome, document.getElementById('logoutButton'));
 
-            document.getElementById('logoutButton').addEventListener('click', async function() {
-                await fetch("/api/logout");
-                window.location.href = 'index.html';
-            });
-        } else {
-            document.getElementById('logoutButton').style.display = 'none';
-            document.getElementById('login').style.display = 'flex';
+                    document.getElementById('logoutButton').addEventListener('click', async function() {
+                        await fetch("/api/logout");
+                        window.location.href = 'index.html';
+                    });
+                } else {
+                    document.getElementById('logoutButton').style.display = 'none';
+                    document.getElementById('login').style.display = 'flex';
+                }
+            } catch (error) {
+                console.error('Error checking login status:', error);
+            }
         }
-    } catch (error) {
-        console.error('Error checking login status:', error);
-    }
-}
         checkLoginStatus();
 
     </script>

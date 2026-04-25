@@ -148,7 +148,6 @@
             background-color: #5c0d76;
             color: #9b7cc0;
         }
-
     </style>
     <title>Shopping Cart</title>
 </head>
@@ -184,6 +183,7 @@
                     cartItemsDiv.innerHTML = '';
                     let totalPrice = 0;
 
+                    // If there is nothing in cart
                     if (cartItems.length === 0) {
                         document.getElementById('checkout').disabled = true;
                         cartItemsDiv.innerHTML = '<p>Your cart is empty. Start browsing for books!</p>';
@@ -192,6 +192,7 @@
                         return;
                     } 
 
+                    // Load each cart item
                     cartItems.forEach(item => {
                         const itemDiv = document.createElement('div');
                         itemDiv.className = 'cart-item';
@@ -203,6 +204,7 @@
                         info.className = 'cart-item-info';
                         info.innerHTML = `${item.title}<span>$${parseFloat(item.price).toFixed(2)} x ${item.quantity}</span>`;
 
+                        // Remove from cart button
                         const removeBtn = document.createElement('button');
                         removeBtn.textContent = 'Remove';
                         removeBtn.className = 'remove-btn';
@@ -230,6 +232,7 @@
                         totalPrice += parseFloat(item.price) * item.quantity;
                     });
 
+                    // Create order and save it locally
                     const orderData = {
                             items: cartItems,
                             total: totalPrice.toFixed(2)
@@ -250,6 +253,7 @@
 
         loadCart();
 
+        // Checkout button / Continue to payment page
         document.getElementById('checkout').addEventListener('click', function() {
             const total = document.getElementById('total').textContent.replace('Total: $', '');
             if (parseFloat(total) <= 0) {
@@ -259,42 +263,40 @@
             window.location.href = 'payment.html';
         });
 
-    // Logout functionality
-        document.getElementById('logoutButton').addEventListener('click', async function()
-        {
+    // Logout
+        document.getElementById('logoutButton').addEventListener('click', async function(){
             await fetch("/api/logout");
             window.location.href = 'index.html'; // Redirect to home page after logout
         });
 
         // Is User Logged In?
         async function checkLoginStatus() {
-    try {
-        const response = await fetch('/api/user');
-        const result = await response.json();
-        if (result.loggedIn) {
-            document.getElementById('login').style.display = 'none';
-            document.getElementById('logoutButton').style.display = 'block';
-            document.getElementById('logoutButton').textContent = `Logout (${result.username})`;
+            try {
+                const response = await fetch('/api/user');
+                const result = await response.json();
+                if (result.loggedIn) {
+                    document.getElementById('login').style.display = 'none';
+                    document.getElementById('logoutButton').style.display = 'block';
+                    document.getElementById('logoutButton').textContent = `Logout (${result.username})`;
 
-            const welcome = document.createElement('span');
-            welcome.id = 'welcome-message';
-            welcome.textContent = `Welcome, ${result.username}!`;
-            document.getElementById('nav-right').insertBefore(welcome, document.getElementById('logoutButton'));
+                    const welcome = document.createElement('span');
+                    welcome.id = 'welcome-message';
+                    welcome.textContent = `Welcome, ${result.username}!`;
+                    document.getElementById('nav-right').insertBefore(welcome, document.getElementById('logoutButton'));
 
-            document.getElementById('logoutButton').addEventListener('click', async function() {
-                await fetch("/api/logout");
-                window.location.href = 'index.html';
-            });
-        } else {
-            document.getElementById('logoutButton').style.display = 'none';
-            document.getElementById('login').style.display = 'flex';
+                    document.getElementById('logoutButton').addEventListener('click', async function() {
+                        await fetch("/api/logout");
+                        window.location.href = 'index.html';
+                    });
+                } else {
+                    document.getElementById('logoutButton').style.display = 'none';
+                    document.getElementById('login').style.display = 'flex';
+                }
+            } catch (error) {
+                console.error('Error checking login status:', error);
+            }
         }
-    } catch (error) {
-        console.error('Error checking login status:', error);
-    }
-}
         checkLoginStatus();
     </script>
-    
 </body>
 </html>

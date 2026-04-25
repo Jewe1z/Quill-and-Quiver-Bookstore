@@ -52,7 +52,6 @@
             padding: 15px;
             text-align: center;
         }
-        
         h2, h3 {
             font-family: 'Cormorant Garamond', serif;
             background-color: #9b7cc0;
@@ -150,9 +149,8 @@
         }
         fetchFeaturedBooks();
 
-        // Logout functionality
-        document.getElementById('logoutButton').addEventListener('click', async function()
-        {
+        // Logout
+        document.getElementById('logoutButton').addEventListener('click', async function(){
             await fetch("/api/logout");
             window.location.href = 'index.html'; // Redirect to home page after logout
         });
@@ -168,9 +166,9 @@
                     document.getElementById('logoutButton').textContent = `Logout (${result.username})`;
 
                     const welcome = document.createElement('span');
-            welcome.id = 'welcome-message';
-            welcome.textContent = `Welcome, ${result.username}!`;
-            document.getElementById('nav-right').insertBefore(welcome, document.getElementById('logoutButton'));
+                    welcome.id = 'welcome-message';
+                    welcome.textContent = `Welcome, ${result.username}!`;
+                    document.getElementById('nav-right').insertBefore(welcome, document.getElementById('logoutButton'));
 
                     document.getElementById('logoutButton').addEventListener('click', async function() {
                         await fetch("/api/logout");

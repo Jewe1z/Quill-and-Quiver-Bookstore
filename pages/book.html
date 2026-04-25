@@ -238,7 +238,7 @@
 const params = new URLSearchParams(window.location.search);
 const bookId = params.get('id');
 
-// If no book Id provided (book clicked from browse page), alert user and do not attempt to load book details or reviews
+// If no book Id provided (book clicked from browse page), alert user and do not load book details or reviews
 if (bookId) {
     loadBook();
     loadReviews();
@@ -257,7 +257,7 @@ if (bookId) {
         document.getElementById('front').src = `/frontCovers/${book.front_cover}`;
         document.getElementById('back').src = `/backCovers/${book.back_cover}`;
 
-        // Add to Cart functionality
+        // Add to Cart
         document.getElementById('add-to-cart').addEventListener('click', async () => {
             const quantity = parseInt(prompt('How many copies would you like to add?'));
             if (isNaN(quantity) || quantity <= 0) {
@@ -303,86 +303,84 @@ if (bookId) {
         });
     }
 
-    // Submit Review
-document.getElementById('submit-review').addEventListener('click', async () => {
-    const rating = document.getElementById('rating').value;
-    const reviewText = document.getElementById('review-text').value;
-
-    try {
-        const response = await fetch(`/api/books/${bookId}/reviews`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ rating, review_text: reviewText })
-        });
-        if (response.ok) {
-            alert('Review submitted!');
-            loadReviews();
-        } else if (response.status === 401) {
-            alert('Please log in to submit a review.');
-            window.location.href = 'login.html'; // Redirect to login page
-        }
-        else {
-            const errorText = await response.text();
-            alert(errorText);
-        }
-    } catch (error) {
-        console.error('Error submitting review:', error);
-        alert('An error occurred while submitting your review.');
-    }
-});
-
-// Star rating functionality
-let selectedRating = 5;
-document.getElementById('star-rating').addEventListener('click', (e) => {
-    if (e.target.tagName === 'SPAN') {
-        selectedRating = parseInt(e.target.dataset.value);
-        document.getElementById('rating').value = selectedRating;
-
-        document.querySelectorAll('.star-rating span').forEach(star => {
-            star.classList.remove('star-selected');
-            if (parseInt(star.dataset.value) <= selectedRating) {
-                star.classList.add('star-selected');
+// Submit Review
+    document.getElementById('submit-review').addEventListener('click', async () => {
+        const rating = document.getElementById('rating').value;
+        const reviewText = document.getElementById('review-text').value;
+        try {
+            const response = await fetch(`/api/books/${bookId}/reviews`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ rating, review_text: reviewText })
+            });
+            if (response.ok) {
+                alert('Review submitted!');
+                loadReviews();
+            } else if (response.status === 401) {
+                alert('Please log in to submit a review.');
+                window.location.href = 'login.html'; // Redirect to login page
             }
-        });
-    }
-});
+            else {
+                const errorText = await response.text();
+                alert(errorText);
+            }
+        } catch (error) {
+            console.error('Error submitting review:', error);
+            alert('An error occurred while submitting your review.');
+        }
+    });
+
+// Star rating
+    let selectedRating = 5;
+    document.getElementById('star-rating').addEventListener('click', (e) => {
+        if (e.target.tagName === 'SPAN') {
+            selectedRating = parseInt(e.target.dataset.value);
+            document.getElementById('rating').value = selectedRating;
+
+            document.querySelectorAll('.star-rating span').forEach(star => {
+                star.classList.remove('star-selected');
+                if (parseInt(star.dataset.value) <= selectedRating) {
+                    star.classList.add('star-selected');
+                }
+            });
+        }
+    });
 
 // Logout functionality
-        document.getElementById('logoutButton').addEventListener('click', async function()
-        {
+        document.getElementById('logoutButton').addEventListener('click', async function(){
             await fetch("/api/logout");
             window.location.href = 'index.html'; // Redirect to home page after logout
         });
 
         // Is User Logged In?
         async function checkLoginStatus() {
-    try {
-        const response = await fetch('/api/user');
-        const result = await response.json();
-        if (result.loggedIn) {
-            document.getElementById('login').style.display = 'none';
-            document.getElementById('logoutButton').style.display = 'block';
-            document.getElementById('logoutButton').textContent = `Logout (${result.username})`;
+            try {
+                const response = await fetch('/api/user');
+                const result = await response.json();
+                if (result.loggedIn) {
+                    document.getElementById('login').style.display = 'none';
+                    document.getElementById('logoutButton').style.display = 'block';
+                    document.getElementById('logoutButton').textContent = `Logout (${result.username})`;
 
-            const welcome = document.createElement('span');
-            welcome.id = 'welcome-message';
-            welcome.textContent = `Welcome, ${result.username}!`;
-            document.getElementById('nav-right').insertBefore(welcome, document.getElementById('logoutButton'));
+                    const welcome = document.createElement('span');
+                    welcome.id = 'welcome-message';
+                    welcome.textContent = `Welcome, ${result.username}!`;
+                    document.getElementById('nav-right').insertBefore(welcome, document.getElementById('logoutButton'));
 
-            document.getElementById('logoutButton').addEventListener('click', async function() {
-                await fetch("/api/logout");
-                window.location.href = 'index.html';
-            });
-        } else {
-            document.getElementById('logoutButton').style.display = 'none';
-            document.getElementById('login').style.display = 'flex';
+                    document.getElementById('logoutButton').addEventListener('click', async function() {
+                        await fetch("/api/logout");
+                        window.location.href = 'index.html';
+                    });
+                } else {
+                    document.getElementById('logoutButton').style.display = 'none';
+                    document.getElementById('login').style.display = 'flex';
+                }
+            } catch (error) {
+                console.error('Error checking login status:', error);
+            }
         }
-    } catch (error) {
-        console.error('Error checking login status:', error);
-    }
-}
         checkLoginStatus();          
 </script>
 </body>

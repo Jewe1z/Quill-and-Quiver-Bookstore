@@ -3,6 +3,8 @@ const express = require('express');
 const path = require('path');
 const rout = express.Router();
 require('dotenv').config();
+
+// Nodemailer setup for emailing receipt
 const nodemailer = require('nodemailer');
 const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -25,18 +27,10 @@ rout.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'pages', 'index.html'));
 });
 
-rout.get('/create_account', (req, res) => {
-    res.sendFile(path.join(__dirname, 'pages', 'create_account.html'));
-});
-
-rout.get('/browse', (req, res) => {
-    res.sendFile(path.join(__dirname, 'pages', 'browse.html'));
-});
-
-
 // Featured Books
 rout.get('/api/featured-books', async (req, res) => {
     try {
+        // These book Ids can be changed based on what books I want to feature
         const featuredBooks = await pool.query(
             'SELECT * FROM books WHERE book_id IN (5, 16, 19)'
         );
@@ -61,7 +55,6 @@ rout.get('/api/books', async (req, res) => {
 // Books By Genre
 rout.get('/api/genres/:genre_id/books', async (req, res) => {
     const genreId = req.params.genre_id;
-
     try {
         const books = await pool.query(
             'SELECT b.* FROM books b JOIN book_genres bg ON b.book_id = bg.book_id WHERE bg.genre_id = $1 AND b.quantity > 0',
@@ -70,7 +63,6 @@ rout.get('/api/genres/:genre_id/books', async (req, res) => {
         if (books.rows.length === 0) {
             return res.status(404).send('No books found for this genre');
         }
-
         res.json(books.rows);
     } catch (err) {
         console.error(err.message);
@@ -81,7 +73,6 @@ rout.get('/api/genres/:genre_id/books', async (req, res) => {
 // Book By ID for Book Details Page
 rout.get('/api/books/:id', async (req, res) => {
     const bookId = req.params.id;
-
     try {
         const book = await pool.query(
             'SELECT * FROM books WHERE book_id = $1',
@@ -100,7 +91,6 @@ rout.get('/api/books/:id', async (req, res) => {
 // Search Books By Title / Author
 rout.get('/api/search', async (req, res) => {
     const query = req.query.q;
-
     try {
         const books = await pool.query(
             'SELECT DISTINCT b. * FROM books b LEFT JOIN book_authors ba ON b.book_id = ba.book_id LEFT JOIN authors a ON ba.author_id = a.author_id WHERE (b.title ILIKE $1 OR a.author_name ILIKE $1) AND b.quantity > 0',
@@ -124,7 +114,6 @@ rout.get('/api/user', (req, res) => {
 // User Registration
 rout.post('/api/register', async (req, res) => {
     const { username, email, password } = req.body;
-
     try {
         const existingUser = await pool.query(
             'SELECT * FROM users WHERE username = $1 OR email = $2',
@@ -148,36 +137,31 @@ rout.post('/api/register', async (req, res) => {
 // User Login
 rout.post('/api/login', async (req, res) => {
     const { username, password } = req.body;  
-
     try {
         const user = await pool.query(
             'SELECT * FROM users WHERE username = $1',
             [username]
         );
-
         if (user.rows.length === 0) {
             return res.status(401).send('Invalid credentials');
         }
-
         const isPasswordValid = await bcrypt.compare(password, user.rows[0].password);
-
         if (!isPasswordValid) {
             return res.status(401).send('Invalid credentials');
         }
-
+        // Create session for user once logged in
         req.session.userId = {
             user_id: user.rows[0].user_id,
             username: user.rows[0].username
         };
         res.json({ message: 'Login successful', user: req.session.userId });
-
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Database Error');
     }
 });
 
-// Logout
+// Logout / destroy session
 rout.get('/api/logout', (req, res) => {
     req.session.destroy((err) => {
         if (err) {
@@ -188,12 +172,11 @@ rout.get('/api/logout', (req, res) => {
     });
 });
 
-// Cart Per User Get
+// Get cart from database / cart saves for each user
 rout.get('/api/cart', async (req, res) => {
     if (!req.session.userId) {
         return res.status(401).send('Please Log In');
     }
-
     try {
         const cart = await pool.query(
             'SELECT c.cart_id, b.book_id,b.title, b.price, b.front_cover, b.back_cover, c.quantity FROM cart c JOIN books b ON c.book_id = b.book_id WHERE c.user_id = $1',
@@ -206,33 +189,35 @@ rout.get('/api/cart', async (req, res) => {
     }
 });
 
-// Cart Per User Post To DB
+// Post book to cart in DB
 rout.post('/api/cart', async (req, res) => {
     if (!req.session.userId) {
         return res.status(401).send('Please Log In');
     }
-
     const { book_id, quantity } = req.body;
-
     try {
+        // Find available stock
         const stock = await pool.query('SELECT quantity FROM books WHERE book_id = $1', [book_id]);
         const availableStock = stock.rows[0].quantity;
 
+        // Check if book is already in cart
         const existingCartItem = await pool.query(
             'SELECT * FROM cart WHERE user_id = $1 AND book_id = $2',
             [req.session.userId.user_id, book_id]
         );
-
+        // If book is in cart, set currentQuantity to amount of that book in cart, otherwise = 0
         const currentQuantity = existingCartItem.rows.length > 0 ? existingCartItem.rows[0].quantity : 0;
 
         if (currentQuantity + quantity > availableStock) {
             return res.status(400).send('Not enough stock available');
         }
+        // If book is in cart already, update quantity
         if (existingCartItem.rows.length > 0) {
             await pool.query(
                 'UPDATE cart SET quantity = quantity + $1 WHERE user_id = $2 AND book_id = $3',
                 [quantity, req.session.userId.user_id, book_id]
             );
+        // Otherwise insert book into cart
         } else {
             await pool.query(
                 'INSERT INTO cart (user_id, book_id, quantity) VALUES ($1, $2, $3)',
@@ -240,20 +225,18 @@ rout.post('/api/cart', async (req, res) => {
             );
         }
         res.json({ message: 'Book(s) added to cart' });
-
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Database Error');
     }
 });
 
-// Cart Per User Delete From DB
+// Remove book from cart
 rout.delete('/api/cart/:book_id', async (req, res) => {
     if (!req.session.userId) {
         return res.status(401).send('Please Log In');
     }
     const { book_id } = req.params;
-
     try {
         await pool.query(
             'DELETE FROM cart WHERE user_id = $1 AND book_id = $2',
@@ -266,10 +249,9 @@ rout.delete('/api/cart/:book_id', async (req, res) => {
     }
 });
 
-// Reviews for Book Details Page
+// Get reviews for Book Details Page
 rout.get('/api/books/:id/reviews', async (req, res) => {
     const bookId = req.params.id;
-
     try {
         const reviews = await pool.query(
             'SELECT r.review_id, r.rating, r.review_text, r.review_date, u.username FROM reviews r JOIN users u ON r.user_id = u.user_id WHERE r.book_id = $1 ORDER BY r.review_date DESC',
@@ -287,11 +269,9 @@ rout.post('/api/books/:id/reviews', async (req, res) => {
     if (!req.session.userId) {
         return res.status(401).send('Please Log In');
     }
-
     const bookId = req.params.id;
     const { rating, review_text } = req.body;
     const userId = req.session.userId.user_id;
-
     try {
         await pool.query(
             'INSERT INTO reviews (book_id, user_id, rating, review_text, review_date) VALUES ($1, $2, $3, $4, NOW())',
@@ -325,14 +305,13 @@ rout.post('/api/create-payment-intent', async (req, res) => {
     }
 });
 
+// Payment transaction
 rout.post('/api/order', async (req, res) => {
     if (!req.session.userId) {
         return res.status(401).send('Please Log In');
     }
- 
     const { items, total, shipping } = req.body;
     const userId = req.session.userId.user_id;
- 
     try {
         // Begin Transaction
         await pool.query('BEGIN');
@@ -340,6 +319,7 @@ rout.post('/api/order', async (req, res) => {
         // Make sure itmes are still in stock
         for (const item of items) {
             const stock = await pool.query('SELECT quantity FROM books WHERE book_id = $1', [item.book_id]);
+            // If the stock is less than the amount in the cart, rollback the transaction
             if (stock.rows[0].quantity < item.quantity) {
                 await pool.query('ROLLBACK');
                 return res.status(400).json({ error: `"${item.title}" no longer has enough stock.` });
@@ -353,7 +333,7 @@ rout.post('/api/order', async (req, res) => {
         );
         const { email, username } = userResult.rows[0];
 
-        // Update amount of books in database
+        // Update stock of books in database
         for (const item of items) {
             await pool.query('UPDATE books SET quantity = quantity - $1 WHERE book_id = $2',
                 [item.quantity, item.book_id]
@@ -366,7 +346,7 @@ rout.post('/api/order', async (req, res) => {
         // Save transaction
         await pool.query('COMMIT');
 
-        // Build the email
+        // Create the email receipt
         const itemsHtml = items.map(item =>
             `<tr>
                 <td style="padding: 6px 16px 6px 0;">${item.title}</td>
@@ -375,6 +355,7 @@ rout.post('/api/order', async (req, res) => {
             </tr>`
         ).join('');
  
+        // Format email
         await transporter.sendMail({
             from: '"The Quill and Quiver" <quillandquiver2593@gmail.com>',
             to: email,
@@ -422,4 +403,5 @@ rout.post('/api/order', async (req, res) => {
     }
 });
 
+// Export routs
 module.exports = rout;
