@@ -1,14 +1,12 @@
 const { Pool } = require('pg');
 require('dotenv').config();
-const port = process.env.PORT || 3000;
 
 // Connection pool
 const pool = new Pool({
-    user: process.env.DB_USER,
-    host: process.env.DB_HOST,
-    database: process.env.DB_DATABASE,
-    password: process.env.DB_PASSWORD,
-    port: process.env.DB_PORT,
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+        rejectUnauthorized: false // This is required for Render cloud connections
+    }
 });
 
 module.exports = pool;
