@@ -164,7 +164,7 @@
 
             // Send the data
             try {
-                const response = await fetch('/api/register', {
+                const res = await fetch('/api/register', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -172,11 +172,11 @@
                     body: JSON.stringify(data)
                 });
 
-                if (response.ok) {
+                if (res.ok) {
                     alert('Account created successfully!');
                     window.location.href = 'login.html'; // Redirect to login page
                 } else {
-                    const errorText = await response.text();
+                    const errorText = await res.text();
                     alert('Error creating account: ' + errorText);
                 }
             } catch (error) {

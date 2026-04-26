@@ -149,11 +149,7 @@
         }
         fetchFeaturedBooks();
 
-        // Logout
-        document.getElementById('logoutButton').addEventListener('click', async function(){
-            await fetch("/api/logout");
-            window.location.href = 'index.html'; // Redirect to home page after logout
-        });
+
 
         // Is User Logged In?
         async function checkLoginStatus() {
@@ -170,9 +166,10 @@
                     welcome.textContent = `Welcome, ${result.username}!`;
                     document.getElementById('nav-right').insertBefore(welcome, document.getElementById('logoutButton'));
 
+                    // Logout
                     document.getElementById('logoutButton').addEventListener('click', async function() {
                         await fetch("/api/logout");
-                        window.location.href = 'index.html';
+                        window.location.href = 'index.html'; // Go back to home page
                     });
                 } else {
                     document.getElementById('logoutButton').style.display = 'none';

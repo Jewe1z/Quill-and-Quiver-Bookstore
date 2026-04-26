@@ -41,7 +41,7 @@ rout.get('/api/featured-books', async (req, res) => {
     }
 });
 
-// All Books
+// Select all Books
 rout.get('/api/books', async (req, res) => {
     try {
         const books = await pool.query('SELECT * FROM books WHERE quantity > 0');
@@ -56,6 +56,7 @@ rout.get('/api/books', async (req, res) => {
 rout.get('/api/genres/:genre_id/books', async (req, res) => {
     const genreId = req.params.genre_id;
     try {
+        // Join books with book genres so we can search for books by genres
         const books = await pool.query(
             'SELECT b.* FROM books b JOIN book_genres bg ON b.book_id = bg.book_id WHERE bg.genre_id = $1 AND b.quantity > 0',
             [genreId]
@@ -92,6 +93,7 @@ rout.get('/api/books/:id', async (req, res) => {
 rout.get('/api/search', async (req, res) => {
     const query = req.query.q;
     try {
+        // Join authors and books so we can search for both
         const books = await pool.query(
             'SELECT DISTINCT b. * FROM books b LEFT JOIN book_authors ba ON b.book_id = ba.book_id LEFT JOIN authors a ON ba.author_id = a.author_id WHERE (b.title ILIKE $1 OR a.author_name ILIKE $1) AND b.quantity > 0',
             [`%${query}%`]
@@ -115,14 +117,18 @@ rout.get('/api/user', (req, res) => {
 rout.post('/api/register', async (req, res) => {
     const { username, email, password } = req.body;
     try {
+        // Does username or email exist?
         const existingUser = await pool.query(
             'SELECT * FROM users WHERE username = $1 OR email = $2',
             [username, email]
         );
+        // If exists
         if (existingUser.rows.length > 0) {
             return res.status(400).send('Username or email already exists');
         }
+        // Hash password
         const hashedPassword = await bcrypt.hash(password, saltRounds);
+        // Insert user information if user does not exist
         const result = await pool.query(
             'INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING *',
             [username, email, hashedPassword]
@@ -138,14 +144,18 @@ rout.post('/api/register', async (req, res) => {
 rout.post('/api/login', async (req, res) => {
     const { username, password } = req.body;  
     try {
+        // Does user exist?
         const user = await pool.query(
             'SELECT * FROM users WHERE username = $1',
             [username]
         );
+        // If no user by that username
         if (user.rows.length === 0) {
             return res.status(401).send('Invalid credentials');
         }
+        // Compare password entered with password matched with the username in the DB
         const isPasswordValid = await bcrypt.compare(password, user.rows[0].password);
+        // If no match
         if (!isPasswordValid) {
             return res.status(401).send('Invalid credentials');
         }
@@ -285,13 +295,19 @@ rout.post('/api/books/:id/reviews', async (req, res) => {
 }); 
 
 // Stripe Payment
+// Import Stripe
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 rout.get('/api/config', (req, res) => {
     res.json({ stripePublishKey: process.env.STRIPE_PUBLISH_KEY });
 });
-
+// Payment
 rout.post('/api/create-payment-intent', async (req, res) => {
+// Total from cart
     const { amount } = req.body;
+
+// console.log("Received amount for Stripe:", amount);
+
+    // Create transaction through stripe
     try {
         const paymentIntent = await stripe.paymentIntents.create({
             amount,

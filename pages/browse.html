@@ -221,34 +221,35 @@
         toggleBtn.addEventListener('click', () => {
             menu.classList.toggle('hidden');
         });
+        // If clicked outside drop menu, dropdown genre menu is hidden
         document.addEventListener('click', (e) => {
             if (!document.getElementById('genre-dropdown').contains(e.target)) {
                 menu.classList.add('hidden');
             }
         });
-        document.getElementById('genre-list').addEventListener('click', async (event) => {
-            if (event.target.tagName === 'A') {
-                event.preventDefault();
+        document.getElementById('genre-list').addEventListener('click', async (e) => {
+            if (e.target.tagName === 'A') {
+                e.preventDefault(); // Prevents page reload
 
                 const bookListDiv = document.getElementById('book-list');
                 bookListDiv.innerHTML = '';
 
                 // All Books clicked
-                if (event.target.id === 'all-books') {
-                    const response = await fetch('/api/books');
-                    const books = await response.json();
+                if (e.target.id === 'all-books') {
+                    const res = await fetch('/api/books');
+                    const books = await res.json();
                     displayBooks(books);
                     return;
                 }
 
                 // Genre clicked
-                const genreId = event.target.dataset.id;
-                const response = await fetch(`/api/genres/${genreId}/books`);
-                const books = await response.json();
+                const genreId = e.target.dataset.id;
+                const res = await fetch(`/api/genres/${genreId}/books`);
+                const books = await res.json();
                 displayBooks(books);
             }
         });
-// Function to display books in the book list or genre list
+// Function to display books in the book list or genre list or search
         function displayBooks(books) {
             const bookListDiv = document.getElementById('book-list');
             bookListDiv.innerHTML = '';
@@ -256,31 +257,39 @@
             // Sort alphabetically
             books.sort((a, b) => a.title.localeCompare(b.title));
 
+            // If no books are found via search or in genres
             if (books.length === 0) {
                 bookListDiv.innerHTML = '<p>No books found.</p>';
                 return;
             }
 
+            // Loop through each book in genre or from search
             books.forEach(book => {
                 const bookDiv = document.createElement('div');
                 bookDiv.className = 'book-card';
+                // If book card is clicked, takes you to book details page based off id
                 bookDiv.addEventListener('click', () => {
                     window.location.href = `book.html?id=${book.book_id}`;
                 });
 
+                // Create book elements
                 const title = document.createElement('h2');
                 title.textContent = book.title;
 
                 const frontImg = document.createElement('img');
                 frontImg.src = `/frontCovers/${book.front_cover}`;
 
+                // Add to cart button
                 const addCartBtn = document.createElement('button');
                 addCartBtn.textContent = 'Add to Cart';
+                // On click run add to cart function
                 addCartBtn.addEventListener('click', (event) => {
+                    // Makes it so add to cart button is separate from the book card click
                     event.stopPropagation();
                     addToCart(book.book_id, book.title);
                 });
 
+                // Display book elements
                 bookDiv.appendChild(frontImg);
                 bookDiv.appendChild(title);
                 bookDiv.appendChild(addCartBtn);
@@ -290,11 +299,13 @@
         // Search bar
         const search = document.getElementById('search');
         search.addEventListener('input', async () => {
+            // Query for search in backend
             const query = search.value.trim();
             if (query === '') {
                 document.getElementById('book-list').innerHTML = '';
                 return;
             }
+            // If books / authors found by search query, display those
             const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
             const books = await response.json();
             displayBooks(books);
@@ -303,18 +314,22 @@
         // Add book to cart
         async function addToCart(bookId, bookTitle) {
             const quantity = parseInt(prompt('How many copies would you like to add?'));
+            // amount must be a valid number above 0
             if (isNaN(quantity) || quantity <= 0) {
                 alert('Please enter a valid quantity.');
                 return;
             }
             try {
+                // Post book id / quantity to cart
                 const response = await fetch('/api/cart', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ book_id: bookId, quantity })
                 });
+                // Alert of success
                 if (response.ok) {
                     alert(`Added ${quantity} copies of "${bookTitle}" to cart!`);
+                    // Must be logged in to modify cart
                 } else if (response.status === 401) {
                     alert('Please log in to add books to your cart.');
                     window.location.href = 'login.html';
@@ -327,12 +342,6 @@
             }
         }
 
-        // Logout
-        document.getElementById('logoutButton').addEventListener('click', async function()
-        {
-            await fetch("/api/logout");
-            window.location.href = 'index.html'; // Redirect to home page after logout
-        });
 
         // Is User Logged In?
         async function checkLoginStatus() {
@@ -349,9 +358,10 @@
                     welcome.textContent = `Welcome, ${result.username}!`;
                     document.getElementById('nav-right').insertBefore(welcome, document.getElementById('logoutButton'));
 
+                    // Logout
                     document.getElementById('logoutButton').addEventListener('click', async function() {
                         await fetch("/api/logout");
-                        window.location.href = 'index.html';
+                        window.location.href = 'index.html'; // Go back to home page
                     });
                 } else {
                     document.getElementById('logoutButton').style.display = 'none';

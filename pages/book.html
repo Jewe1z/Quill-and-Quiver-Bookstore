@@ -161,13 +161,11 @@
             flex-direction: row;
             gap: 5px;
         }
-
         .star-rating span {
             font-size: 2rem;
             color: #9b7cc0;
             cursor: pointer;
         }
-
         .star-rating span:hover {
             color: #f5c518;
         }
@@ -235,6 +233,7 @@
 </div>
 <script>
 
+// Get received book Id
 const params = new URLSearchParams(window.location.search);
 const bookId = params.get('id');
 
@@ -247,9 +246,11 @@ if (bookId) {
 }
 // Load Book Details
     async function loadBook() {
+        // Sets information from book id to book
         const res = await fetch(`/api/books/${bookId}`);
         const book = await res.json();
 
+        // Set elements to book data
         document.getElementById('title').textContent = book.title;
         document.getElementById('price').textContent = `Price: $${book.price}`;
         document.getElementById('summary').textContent = book.summary;
@@ -257,29 +258,33 @@ if (bookId) {
         document.getElementById('front').src = `/frontCovers/${book.front_cover}`;
         document.getElementById('back').src = `/backCovers/${book.back_cover}`;
 
-        // Add to Cart
+        // Add to Cart on click
         document.getElementById('add-to-cart').addEventListener('click', async () => {
             const quantity = parseInt(prompt('How many copies would you like to add?'));
+            // If quantity is not a valid number above 0
             if (isNaN(quantity) || quantity <= 0) {
                 alert('Please enter a valid quantity.');
                 return;
             }
             try {
-                const response = await fetch('/api/cart', {
+                // Sending book data to cart
+                const res = await fetch('/api/cart', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({ book_id: book.book_id, quantity })
                 });
-                if (response.ok) {
+                // Alert user of success
+                if (res.ok) {
                     alert(`Added ${quantity} copies of "${book.title}" to cart!`);
-                } else if (response.status === 401) {
+                    // Must login to add itmes to cart
+                } else if (res.status === 401) {
                     alert('Please log in to add books to your cart.');
                     window.location.href = 'login.html'; // Redirect to login page
                 }
                 else {
-                    const errorText = await response.text();
+                    const errorText = await res.text();
                     alert(errorText);
                 }
             } catch (error) {
@@ -295,6 +300,7 @@ if (bookId) {
         const reviewsDiv = document.getElementById('reviews');
         reviewsDiv.innerHTML = '';
 
+        // Load each review under this book id
         reviews.forEach(review => {
             const reviewDiv = document.createElement('div');
             const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
@@ -308,22 +314,25 @@ if (bookId) {
         const rating = document.getElementById('rating').value;
         const reviewText = document.getElementById('review-text').value;
         try {
-            const response = await fetch(`/api/books/${bookId}/reviews`, {
+            // Send review data to reviews
+            const res = await fetch(`/api/books/${bookId}/reviews`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ rating, review_text: reviewText })
             });
-            if (response.ok) {
+            // Review submitted / Reload reviews
+            if (res.ok) {
                 alert('Review submitted!');
                 loadReviews();
-            } else if (response.status === 401) {
+                // Must login to add reviews
+            } else if (res.status === 401) {
                 alert('Please log in to submit a review.');
                 window.location.href = 'login.html'; // Redirect to login page
             }
             else {
-                const errorText = await response.text();
+                const errorText = await res.text();
                 alert(errorText);
             }
         } catch (error) {
@@ -333,12 +342,15 @@ if (bookId) {
     });
 
 // Star rating
+// Set defalt rating to 5
     let selectedRating = 5;
     document.getElementById('star-rating').addEventListener('click', (e) => {
+        // If a star is clicked
         if (e.target.tagName === 'SPAN') {
+            // Sets the star clicked to the number it is 1 star = 1 etc
             selectedRating = parseInt(e.target.dataset.value);
             document.getElementById('rating').value = selectedRating;
-
+// Goes through each star and highlights all the ones less than the one you pick + the one you picked
             document.querySelectorAll('.star-rating span').forEach(star => {
                 star.classList.remove('star-selected');
                 if (parseInt(star.dataset.value) <= selectedRating) {
@@ -348,11 +360,7 @@ if (bookId) {
         }
     });
 
-// Logout functionality
-        document.getElementById('logoutButton').addEventListener('click', async function(){
-            await fetch("/api/logout");
-            window.location.href = 'index.html'; // Redirect to home page after logout
-        });
+    // console.log("star clicked:", e.target.dataset.value);
 
         // Is User Logged In?
         async function checkLoginStatus() {
@@ -369,9 +377,10 @@ if (bookId) {
                     welcome.textContent = `Welcome, ${result.username}!`;
                     document.getElementById('nav-right').insertBefore(welcome, document.getElementById('logoutButton'));
 
+                    // Logout
                     document.getElementById('logoutButton').addEventListener('click', async function() {
                         await fetch("/api/logout");
-                        window.location.href = 'index.html';
+                        window.location.href = 'index.html'; // Go back to home page
                     });
                 } else {
                     document.getElementById('logoutButton').style.display = 'none';

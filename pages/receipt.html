@@ -157,12 +157,13 @@
         function loadReceipt() {
             const data = JSON.parse(localStorage.getItem('receiptData'));
             if (!data) {
-                window.location.href = 'index.html';
+                window.location.href = 'index.html'; // If no receipt data, go back to home page
                 return;
             }
  
             // Order items
             const itemsDiv = document.getElementById('receipt-items');
+            // Display each item
             data.items.forEach(item => {
                 const div = document.createElement('div');
                 div.className = 'receipt-item';
@@ -170,16 +171,16 @@
                                  <span>$${(item.price * item.quantity).toFixed(2)}</span>`;
                 itemsDiv.appendChild(div);
             });
-            // Total
+            // Show total
             document.getElementById('receipt-total').textContent = `Total: $${data.total}`;
  
-            // Shipping details
-            const s = data.shipping;
+            // Show shipping details
+            const ship = data.shipping;
             document.getElementById('shipping-info').innerHTML = `
                 <strong>Shipping to:</strong><br>
-                ${s.name}<br>
-                ${s.address}<br>
-                ${s.city}, ${s.state} ${s.zip}
+                ${ship.name}<br>
+                ${ship.address}<br>
+                ${ship.city}, ${ship.state} ${ship.zip}
             `;
  
             // Email receipt sent
@@ -191,12 +192,7 @@
         }
  
         loadReceipt();
- 
-        // Logout
-        document.getElementById('logoutButton').addEventListener('click', async function(){
-            await fetch("/api/logout");
-            window.location.href = 'index.html'; // Redirect to home page after logout
-        });
+
 
         // Is User Logged In?
         async function checkLoginStatus() {
@@ -213,9 +209,10 @@
                     welcome.textContent = `Welcome, ${result.username}!`;
                     document.getElementById('nav-right').insertBefore(welcome, document.getElementById('logoutButton'));
 
+                    // Logout
                     document.getElementById('logoutButton').addEventListener('click', async function() {
                         await fetch("/api/logout");
-                        window.location.href = 'index.html';
+                        window.location.href = 'index.html'; // Go back to home page
                     });
                 } else {
                     document.getElementById('logoutButton').style.display = 'none';
