@@ -411,7 +411,6 @@ rout.post('/api/order', async (req, res) => {
     
         } catch (emailError) {
             console.error('Error sending email:', emailError);
-            res.status(500).send('Order processed but failed to send receipt email');
         }
         // Return the email so the receipt page can display it
             res.json({ email });
