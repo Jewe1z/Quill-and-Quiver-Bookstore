@@ -326,8 +326,8 @@
                     });
 
                     if (!res.ok) {
-                        const errData = await res.json();
-                        document.getElementById('error-message').textContent = errData.error || 'Order failed. Please contact support.';
+                        const errText = await res.text();
+                        document.getElementById('error-message').textContent = errText || 'Order failed. Please contact support.';
                         submitButton.disabled = false;
                         return;
                     }
