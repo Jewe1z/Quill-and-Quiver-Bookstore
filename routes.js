@@ -362,53 +362,59 @@ rout.post('/api/order', async (req, res) => {
         // Save transaction
         await pool.query('COMMIT');
 
-        // Create the email receipt
-        const itemsHtml = items.map(item =>
-            `<tr>
-                <td style="padding: 6px 16px 6px 0;">${item.title}</td>
-                <td style="padding: 6px 16px 6px 0;">x${item.quantity}</td>
-                <td style="padding: 6px 0;">$${(item.price * item.quantity).toFixed(2)}</td>
-            </tr>`
-        ).join('');
- 
-        // Format email
-        await transporter.sendMail({
-            from: '"The Quill and Quiver" <quillandquiver2593@gmail.com>',
-            to: email,
-            subject: 'Your Order Receipt — The Quill and Quiver',
-            html: `
-                <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; color: #333;">
-                    <h2 style="color: #5c0d76;">The Quill and Quiver</h2>
-                    <p>Hi <strong>${username}</strong>, thank you for your order!</p>
- 
-                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 16px;">
-                        <thead>
-                            <tr style="border-bottom: 2px solid #7a5a9e;">
-                                <th style="text-align:left; padding: 6px 16px 6px 0;">Title</th>
-                                <th style="text-align:left; padding: 6px 16px 6px 0;">Qty</th>
-                                <th style="text-align:left; padding: 6px 0;">Price</th>
-                            </tr>
-                        </thead>
-                        <tbody>${itemsHtml}</tbody>
-                    </table>
- 
-                    <p style="font-size: 1.1em;"><strong>Total: $${total}</strong></p>
-                    <hr style="border-color: #7a5a9e;">
- 
-                    <p>
-                        <strong>Shipping to:</strong><br>
-                        ${shipping.name}<br>
-                        ${shipping.address}<br>
-                        ${shipping.city}, ${shipping.state} ${shipping.zip}
-                    </p>
- 
-                    <p style="color: #5c0d76;">We hope you enjoy your books!</p>
-                </div>
-            `
-        });
- 
+        try{
+
+            // Create the email receipt
+            const itemsHtml = items.map(item =>
+                `<tr>
+                    <td style="padding: 6px 16px 6px 0;">${item.title}</td>
+                    <td style="padding: 6px 16px 6px 0;">x${item.quantity}</td>
+                    <td style="padding: 6px 0;">$${(item.price * item.quantity).toFixed(2)}</td>
+                </tr>`
+            ).join('');
+    
+            // Format email
+            await transporter.sendMail({
+                from: '"The Quill and Quiver" <quillandquiver2593@gmail.com>',
+                to: email,
+                subject: 'Your Order Receipt — The Quill and Quiver',
+                html: `
+                    <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; color: #333;">
+                        <h2 style="color: #5c0d76;">The Quill and Quiver</h2>
+                        <p>Hi <strong>${username}</strong>, thank you for your order!</p>
+    
+                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 16px;">
+                            <thead>
+                                <tr style="border-bottom: 2px solid #7a5a9e;">
+                                    <th style="text-align:left; padding: 6px 16px 6px 0;">Title</th>
+                                    <th style="text-align:left; padding: 6px 16px 6px 0;">Qty</th>
+                                    <th style="text-align:left; padding: 6px 0;">Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>${itemsHtml}</tbody>
+                        </table>
+    
+                        <p style="font-size: 1.1em;"><strong>Total: $${total}</strong></p>
+                        <hr style="border-color: #7a5a9e;">
+    
+                        <p>
+                            <strong>Shipping to:</strong><br>
+                            ${shipping.name}<br>
+                            ${shipping.address}<br>
+                            ${shipping.city}, ${shipping.state} ${shipping.zip}
+                        </p>
+    
+                        <p style="color: #5c0d76;">We hope you enjoy your books!</p>
+                    </div>
+                `
+            });
+    
+        } catch (emailError) {
+            console.error('Error sending email:', emailError);
+            res.status(500).send('Order processed but failed to send receipt email');
+        }
         // Return the email so the receipt page can display it
-        res.json({ email });
+            res.json({ email });
 
         } catch (err) {
         // If any errors, rollback transaction
