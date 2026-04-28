@@ -13,7 +13,7 @@ app.use(session({
     secret: process.env.SESSION_CODE,
     resave: false,
     saveUninitialized: true,
-    cookieq: { secure: false } // https
+    cookie: { secure: false } // https
 }));
 
 app.use(express.static('pages'));
