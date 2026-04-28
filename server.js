@@ -12,8 +12,12 @@ app.use(express.urlencoded({ extended: true }));
 app.use(session({
     secret: process.env.SESSION_CODE,
     resave: false,
-    saveUninitialized: true,
-    cookie: { secure: false } // https
+    saveUninitialized: false,
+    cookie: { 
+        secure: true,
+        sameSite: 'none',
+        maxAge: 1000 * 60 * 60 * 24 
+    }
 }));
 
 app.use(express.static('pages'));
