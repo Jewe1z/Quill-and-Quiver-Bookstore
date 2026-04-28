@@ -413,7 +413,7 @@ rout.post('/api/order', async (req, res) => {
         //    console.error('Error sending email:', emailError);
         //}
         // Return the email so the receipt page can display it
-        //    res.json({ email });
+           res.json({ email });
 
         } catch (err) {
         // If any errors, rollback transaction
