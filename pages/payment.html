@@ -230,14 +230,19 @@
         
         // Get publish key / calls load summary to get total for initialize function
         async function loadConfig() {
-            const res = await fetch('/api/config');
-            const config = await res.json();
-            stripe = Stripe(config.stripePublishKey);
-            
-            const orderData = loadSummary();
-            if (orderData) {
-                const amountInCents = Math.round(orderData.total * 100);
-                await initialize(amountInCents);
+            try {
+                const res = await fetch('/api/config');
+                const config = await res.json();
+                console.log('Stripe key received:', !!config.stripePublishKey);
+                stripe = Stripe(config.stripePublishKey);
+
+                const orderData = loadSummary();
+                if (orderData) {
+                    const amountInCents = Math.round(orderData.total * 100);
+                    await initialize(amountInCents);
+                }
+            } catch (err) {
+                console.error('loadConfig failed:', err);
             }
         }
 
@@ -282,6 +287,7 @@
             // Submit button disabled until form is filled out
             const submitButton = e.target.querySelector('button');
             submitButton.disabled = true;
+            alert('Submit fired!'); 
 
             const shipping = {
                 name: document.getElementById('name').value,
