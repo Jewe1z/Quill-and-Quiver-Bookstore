@@ -3,6 +3,8 @@ const routes = require('./routes');
 const app = express();
 const path = require('path');
 const session = require('express-session');
+const pgSession = require('connect-pg-simple')(session);
+const pool = require('./database');
 require('dotenv').config();
 
 const port = process.env.PORT || 3000;
@@ -11,6 +13,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.set('trust proxy', 1); 
 app.use(session({
+    store: new pgSession({
+        pool: pool,
+        tableName: 'session'
+    }),
     secret: process.env.SESSION_CODE,
     resave: false,
     saveUninitialized: false,
